@@ -1,148 +1,47 @@
-Here’s a step-by-step Standard Operating Procedure (SOP) for deploying a Node.js application using **Nginx** as a reverse proxy, **Certbot** for SSL certificates, and **PM2** for process management. This SOP assumes your app is deployed on a Linux server.
-
-### Prerequisites
-1. **Nginx** installed.
-2. **Certbot** installed (for automatic SSL certificate management).
-3. **PM2** installed globally (for managing Node.js processes).
+Here’s an updated README structure that includes references to the custom CritterCodes packages and a section for file naming best practices:
 
 ---
 
-### Step 1: SSH into the Server
-Start by accessing your server via SSH:
+# CritterCodes Web Development SOP
 
-```bash
-ssh your_user@your_server_ip
-```
+Welcome to the CritterCodes Standard Operating Procedures (SOP) repository! This repository contains a set of guidelines and best practices for building, organizing, and deploying web applications using CritterCodes standards.
 
-### Step 2: Set Up PM2 to Run Your Node.js App
-1. **Navigate to your project directory**:
-   ```bash
-   cd /path/to/your/project
-   ```
+## Overview
 
-2. **Start the Node.js application using PM2**:
-   Run PM2 with the environment-specific start command:
-   ```bash
-   pm2 start npm --name "app_name" -- start
-   ```
+The SOP covers the complete web application lifecycle, focusing on a consistent, structured approach to developing with **JavaScript** frameworks and libraries, including **Node.js**, **Express**, **MongoDB**, **React.js**, and **Docker**. The repository also includes guidelines for using custom CritterCodes packages such as **CritterCodes@Express-Cli** and **CritterCodes@React-Cli**.
 
-   This command runs `npm start` and assigns the process a name (`app_name`).
+## Contents
 
-3. **Save the PM2 process list** (to ensure it restarts on server reboot):
-   ```bash
-   pm2 save
-   ```
+### 1. **Project Setup**
+   - [Environment Setup](./setup/environment.md): Guidelines for setting up the Node.js and React environment.
+   - [Project Initialization](./setup/initialization.md): Instructions for initializing projects using CritterCodes@Express-Cli and CritterCodes@React-Cli for streamlined setup.
 
-4. **Set PM2 to auto-start on reboot**:
-   ```bash
-   pm2 startup
-   ```
+### 2. **Backend Development (Express Server)**
+   - [Express Server Structure](./backend/express_structure.md): Recommended file structure, naming conventions, and architectural patterns for Express.
+   - [File Naming Best Practices](./backend/file_naming.md): Naming conventions and folder organization for consistency in backend code.
+   - [Database Integration](./backend/database_integration.md): Best practices for integrating MongoDB securely.
+   - [API Development Guidelines](./backend/api_guidelines.md): Standards for developing RESTful APIs, including error handling, response structures, and CritterCodes-specific standards.
 
-   Follow any additional instructions provided by PM2 after running this command.
+### 3. **Frontend Development (React App)**
+   - [React Project Structure](./frontend/react_structure.md): File structure, naming conventions, and organizational patterns using CritterCodes@React-Cli.
+   - [File Naming Best Practices](./frontend/file_naming.md): Naming conventions to maintain clarity and consistency in frontend files.
+   - [State Management](./frontend/state_management.md): Patterns and practices for managing state efficiently.
+   - [Styling and Theming](./frontend/styling.md): Standards for styling, supporting dark/light themes, and utilizing CSS best practices.
 
----
+### 4. **Development Workflow**
+   - [Git Workflow](./workflow/git_workflow.md): A guide for maintaining clean, consistent commit history and branch management.
+   - [Coding Standards](./workflow/coding_standards.md): JavaScript, React, and Node.js coding standards, including CritterCodes-specific style rules.
+   - [Code Review Process](./workflow/code_review.md): Guidelines for reviewing and approving code for quality and consistency.
 
-### Step 3: Configure Nginx as a Reverse Proxy
-1. **Create a new Nginx configuration file** for your app:
-   ```bash
-   sudo nano /etc/nginx/sites-available/app_name
-   ```
-
-2. **Add the following configuration** (adjust based on your app’s port, typically 3000):
-
-   ```nginx
-   server {
-       listen 80;
-       server_name yourdomain.com www.yourdomain.com;
-
-       location / {
-           proxy_pass http://localhost:3000;  # Adjust the port if necessary
-           proxy_http_version 1.1;
-           proxy_set_header Upgrade $http_upgrade;
-           proxy_set_header Connection 'upgrade';
-           proxy_set_header Host $host;
-           proxy_cache_bypass $http_upgrade;
-       }
-   }
-   ```
-
-3. **Enable the configuration** by creating a symbolic link:
-   ```bash
-   sudo ln -s /etc/nginx/sites-available/app_name /etc/nginx/sites-enabled/
-   ```
-
-4. **Test the Nginx configuration** for any syntax errors:
-   ```bash
-   sudo nginx -t
-   ```
-
-5. **Reload Nginx** to apply the changes:
-   ```bash
-   sudo systemctl reload nginx
-   ```
+### 5. **Deployment**
+   - [Docker Setup and Configuration](./deployment/docker_setup.md): Best practices for Dockerfile and Docker Compose configurations for development and production.
+   - [Deployment to Development Server](./deployment/dev_server.md): Steps for deploying to a staging or development environment.
+   - [Production Deployment](./deployment/prod_deployment.md): Secure deployment practices, including environment configuration for production servers.
 
 ---
 
-### Step 4: Secure the Application with SSL using Certbot
-1. **Run Certbot** to obtain an SSL certificate for your domain:
-   ```bash
-   sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
-   ```
-
-   Certbot will automatically configure SSL in your Nginx file if the setup is successful.
-
-2. **Verify SSL renewal**:
-   Certbot should set up a cron job to auto-renew your SSL certificate. You can verify renewal by running:
-
-   ```bash
-   sudo certbot renew --dry-run
-   ```
+By following this SOP, developers can ensure consistency, clarity, and high-quality output across all CritterCodes projects. Each document within this repository is a step-by-step guideline to streamline development, improve team collaboration, and ensure all projects adhere to CritterCodes standards.
 
 ---
 
-### Step 5: Verify Deployment and PM2 Process Monitoring
-1. **Check the PM2 process list** to ensure your app is running:
-   ```bash
-   pm2 list
-   ```
-
-2. **Restart Nginx and PM2 if needed**:
-   ```bash
-   sudo systemctl restart nginx
-   pm2 restart all
-   ```
-
-3. **Access the application** via your domain (https://yourdomain.com) to verify everything is functioning as expected.
-
----
-
-### Summary of Commands
-Here’s a quick command summary for deployment:
-
-```bash
-# SSH into the server
-ssh your_user@your_server_ip
-
-# Start Node.js app with PM2
-cd /path/to/your/project
-pm2 start npm --name "app_name" -- start
-pm2 save
-pm2 startup
-
-# Configure Nginx reverse proxy
-sudo nano /etc/nginx/sites-available/app_name
-sudo ln -s /etc/nginx/sites-available/app_name /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl reload nginx
-
-# Set up SSL with Certbot
-sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
-sudo certbot renew --dry-run
-
-# Verify PM2 and Nginx
-pm2 list
-sudo systemctl restart nginx
-pm2 restart all
-```
-
-This SOP should provide you with a streamlined, reliable deployment process for your Node.js app. Let me know if you need any adjustments or additions!
+This overview provides a clear structure, incorporating the use of custom CritterCodes packages and specific naming conventions for files. We can start developing individual sections as needed!
